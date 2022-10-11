@@ -1,8 +1,5 @@
 # FaqApp
 
-MVP webapp for telma.tv
-Used for test and internal launch
-
 ## Pre-requesites
 
 You must install
@@ -14,7 +11,7 @@ You must install
 Then, clone the repository:
 
 ```bash
-$ git clone ....
+git clone ....
 ```
 
 The app is built under the **Django Framework** and **Django Rest Framework**.
@@ -25,31 +22,23 @@ An expertise with this tool is mandatory.
 Edit your configuration profile to set up your port, database connexion etc
 
 ```
-$ cd telma-tv-my
-nano src/main/resources/application.yml
+cd NaturalBeauty/
+nano NaturalBeauty/settings.py
 ```
 
 Installing the package may suit some users
 
 ```bash
-$ cd telma-tv-my
-telma-tv-my$ mvn clean package -DskipTests
+python3.9 -m venv .env
+(.env) pip install -r ../requirements.txt
 ```
 
 ## Usage
 
-`telma-tv-my` is an MVP (Minimum Valuable Product) to handle account management for Telma TV.
-
 To run the app you need to:
 
 ```
-telma-tv-my$ mvn spring-boot:run
-```
-
-or
-
-```
-telma-tv-my$ mvn spring-boot:run -Dspring-boot.run.profiles=foo,bar
+(.env) python manage.py runserver
 ```
 
 
