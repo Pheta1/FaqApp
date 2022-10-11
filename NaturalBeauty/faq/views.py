@@ -11,9 +11,7 @@ from rest_framework import viewsets
 
 from .models import Category, Faq
 from .forms import StartFaqForm, UpdateFaqScoreForm, RegisterForm
-
 from django.db.models import Q
-
 from .serializers import CategorySerializer, FaqSerializer
 
 
@@ -42,13 +40,10 @@ class CategoryView(TemplateView):
             category=category,
             locked=True
         )
-        half = len(faq_locked)//2 or 1
-        faq_left = faq_locked[:half]
-        faq_right = faq_locked[half:]
 
         context.update({
-            'faq_left': faq_left,
-            'faq_right': faq_right,
+            'faq_left': faq_locked[::2],
+            'faq_right': faq_locked[1::2],
             'categories': categories,
             'first_category': Category.objects.first(),
             'category': category
@@ -67,13 +62,10 @@ class MyView(TemplateView):
             visitor=self.request.user,
             locked=True
         )
-        half = len(my_faq)//2 or 1
-        faq_left = my_faq[:half]
-        faq_right = my_faq[half:]
 
         context.update({
-            'faq_left': faq_left,
-            'faq_right': faq_right,
+            'faq_left': my_faq[::2],
+            'faq_right': my_faq[1::2],
             'categories': categories,
             'first_category': Category.objects.first(),
         })
@@ -91,13 +83,10 @@ class FaqUnlockedView(TemplateView, PermissionRequiredMixin):
         faq_unlocked = Faq.objects.filter(
             locked=False
         )
-        half = len(faq_unlocked) // 2 or 1
-        faq_left = faq_unlocked[:half]
-        faq_right = faq_unlocked[half:]
 
         context.update({
-            'faq_left': faq_left,
-            'faq_right': faq_right,
+            'faq_left': faq_unlocked[::2],
+            'faq_right': faq_unlocked[1::2],
             'first_category': Category.objects.first(),
         })
 
@@ -155,7 +144,6 @@ class UpdateFaqView(FormView):
     def get_form_kwargs(self):
         kwargs = super(UpdateFaqView, self).get_form_kwargs()
         faq = Faq.objects.get(id=self.kwargs["faq_id"])
-
         kwargs['faq'] = faq
 
         return kwargs
