@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="banner header-text">
+      <div class="owl-banner owl-carousel">
+        {% for category in categories %}
+          <div class="banner-item-01" style="background: url({{ category.image.url }})">
+            <div class="text-content">
+              <h2>Natural Beauty</h2>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <!-- Banner Ends Here -->
+{% endblock content %}

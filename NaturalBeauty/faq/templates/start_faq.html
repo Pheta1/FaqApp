@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="page-heading contact-heading header-text">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="text-content">
+              <h4> {{ category.name }} </h4>
+              <h2> Natural Beauty </h2>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="send-message">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="section-heading">
+              <h2>Poser une question</h2>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="contact-form">
+              {% if form.errors %}
+                {% for error in form.errors %}
+                <p class="alert alert-danger user-prov-alert" role="alert">
+                  <i class="fas fa-times-circle"></i> {{ error }} : This field is required.
+                </p>
+                {% endfor %}
+              {% endif %}
+
+              <form method="POST" data-parsley-validate enctype="multipart/form-data">{% csrf_token %}
+                <div class="row">
+                  <div class="col-lg-12 col-md-12 col-sm-12">
+                    <fieldset>
+                      <select class="form-control" name="{{ form.category.name }}">
+                        {% for i, j in form.category.field.choices %}
+                          <option value="{{ i }}">{{ j }}</option>
+                        {% endfor %}
+                      </select>
+                    </fieldset>
+                  </div>
+                  <br> <br> <br>
+                  <div class="col-lg-12 col-md-12 col-sm-12">
+                    <fieldset>
+                      <input name="{{form.visitor.name }}" type="text" class="form-control" placeholder="Full Name">
+                    </fieldset>
+                  </div>
+                  <div class="col-lg-12 col-md-12 col-sm-12">
+                    <fieldset>
+                      <input name="{{ form.email.name }}" type="email" class="form-control" placeholder="E-Mail Address">
+                    </fieldset>
+                  </div>
+
+                  <div class="col-lg-12">
+                    <fieldset>
+                      <textarea name="{{ form.question.name }}" rows="6" class="form-control" placeholder="Votre question"></textarea>
+                    </fieldset>
+                  </div>
+                  <div class="col-lg-12">
+                    <fieldset>
+                      <button type="submit" class="filled-button">Envoyer</button>
+                    </fieldset>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endblock content %}

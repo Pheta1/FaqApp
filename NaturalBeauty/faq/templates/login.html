@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+   <style>
+      .button {
+        display: inline-block;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        color: #ffffff;
+        background-color: #7aa8b7;
+        border-radius: 6px;
+        outline: none;
+      }
+   </style>
+    <div class="page-heading contact-heading header-text">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="text-content">
+              <h4> {{ category.name }} </h4>
+              <h2> Natural Beauty </h2>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="send-message">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="section-heading">
+              <h2>Connectez-vous</h2>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="contact-form">
+              {% if form.errors %}
+                {% for error in form.errors %}
+                <p class="alert alert-danger user-prov-alert" role="alert">
+                  <i class="fas fa-times-circle"></i> {{ error }} : This field is required.
+                </p>
+                {% endfor %}
+              {% endif %}
+
+              <form method="POST" data-parsley-validate enctype="multipart/form-data">{% csrf_token %}
+                <div class="row">
+                  {% if errors %}
+                    <p class="alert alert-danger user-prov-alert"
+                       role="alert"><i class="fas fa-times-circle"></i> {{ errors }}</p>
+                  {% endif %}
+                  <br> <br> <br>
+                  <div class="col-lg-12 col-md-12 col-sm-12">
+                    <fieldset>
+                      <input name="username" type="text" class="form-control" placeholder="Full Name">
+                    </fieldset>
+                  </div>
+                  <div class="col-lg-12 col-md-12 col-sm-12">
+                    <fieldset>
+                      <input name="password" type="password" class="form-control" placeholder="Mot de passe">
+                    </fieldset>
+                  </div>
+                  <div class="col-lg-12">
+                    <fieldset>
+                      <button type="submit" class="filled-button">Se connecter </button>
+                      <a class="button" href="{% url 'faq:register' %}">S'inscrire</a>
+                    </fieldset>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endblock content %}
