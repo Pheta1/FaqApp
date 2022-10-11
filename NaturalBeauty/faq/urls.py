@@ -2,15 +2,18 @@ from django.urls import path, include
 from django.contrib.auth.decorators import login_required
 from rest_framework import routers
 
-from .views import HomeView, MyView, CategoryViewSet, FaqViewSet, RegisterView
-from .views import CategoryView
+from .views import HomeView, UserView, CategoryViewSet, RegisterView
+from .views import ResponseViewSet, QuestionViewSet, QuestionUnlockViewSet
+from .views import FaqView
 from .views import FaqUnlockedView
 from .views import StartFaqView
 from .views import UpdateFaqView
 
 router = routers.DefaultRouter()
 router.register('category', CategoryViewSet)
-router.register('faq', FaqViewSet)
+router.register('question', QuestionViewSet)
+router.register('response', ResponseViewSet)
+router.register('unlock/question', QuestionUnlockViewSet)
 
 urlpatterns = [
     path(
@@ -25,7 +28,7 @@ urlpatterns = [
     ),
     path(
         'category/<int:category_id>',
-        CategoryView.as_view(),
+        FaqView.as_view(),
         name='category'
     ),
     path(
@@ -45,7 +48,7 @@ urlpatterns = [
     ),
     path(
         'my',
-        login_required(MyView.as_view()),
+        login_required(UserView.as_view()),
         name='my'
     ),
     path(

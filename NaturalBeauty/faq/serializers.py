@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from faq.models import Category, Faq
+from .models import Category, Response, Question
 
 
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
@@ -9,9 +9,15 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
         fields = ('name', 'description', 'image')
 
 
-class FaqSerializer(serializers.HyperlinkedModelSerializer):
+class ResponseSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Faq
+        model = Response
+        fields = ('question', 'response', 'locked')
+
+
+class QuestionSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Response
         fields = ('question', 'response', 'locked')
 
 # EOF

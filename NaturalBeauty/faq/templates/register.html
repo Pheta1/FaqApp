@@ -38,18 +38,20 @@
                   <br> <br> <br>
                   <div class="col-lg-12 col-md-12 col-sm-12">
                     <fieldset>
-                      <input name="username" type="text" class="form-control" placeholder="Full Name">
+                      <input name="{{form.username.name}}" type="text"
+                             class="form-control" placeholder="{{form.username.name}}">
                     </fieldset>
                   </div>
                   <div class="col-lg-12 col-md-12 col-sm-12">
                     <fieldset>
-                      <input name="email" type="email" class="form-control"
+                      <input name="{{form.email.name}}" type="email"
+                             class="form-control"
                              placeholder="Votre Email">
                     </fieldset>
                   </div>
                   <div class="col-lg-12 col-md-12 col-sm-12">
                     <fieldset>
-                      <input name="password" type="password"
+                      <input name="{{form.password.name}}" type="password"
                              class="form-control" placeholder="Mot de passe">
                     </fieldset>
                   </div>

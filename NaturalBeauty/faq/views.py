@@ -9,13 +9,15 @@ from django.views.generic import TemplateView
 from django.contrib.auth.models import User
 from rest_framework import viewsets
 
-from .models import Category, Faq
-from .forms import StartFaqForm, UpdateFaqScoreForm, RegisterForm
+from .models import Category, Question, Response
+from .forms import RegisterForm, QuestionForm, UserForm, ResponseForm
 from django.db.models import Q
-from .serializers import CategorySerializer, FaqSerializer
+from .serializers import CategorySerializer, ResponseSerializer, QuestionSerializer
 
 
 class HomeView(TemplateView):
+    """View used by the visitor to navigate through the site """
+
     template_name = 'home.html'
 
     def get_context_data(self, **kwargs):
@@ -29,21 +31,46 @@ class HomeView(TemplateView):
         return context
 
 
-class CategoryView(TemplateView):
+class UserView(TemplateView):
+    """The view used by a member: shows all the questions the user requested"""
+
+    template_name = 'user_faq.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        categories = Category.objects.all()
+        user_question = Question.objects.filter(
+            visitor=self.request.user,
+            locked=True
+        )
+
+        context.update({
+            'faq_left': user_question[::2],
+            'faq_right': user_question[1::2],
+            'categories': categories,
+            'first_category': Category.objects.first(),
+        })
+
+        return context
+
+
+class FaqView(TemplateView):
+    """View used by the visitor show all faq with response"""
+
     template_name = 'category.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         category = Category.objects.get(id=self.kwargs["category_id"])
         categories = Category.objects.all()
-        faq_locked = Faq.objects.filter(
+        question_locked = Question.objects.filter(
             category=category,
             locked=True
         )
 
         context.update({
-            'faq_left': faq_locked[::2],
-            'faq_right': faq_locked[1::2],
+            'faq_left': question_locked[::2],
+            'faq_right': question_locked[1::2],
             'categories': categories,
             'first_category': Category.objects.first(),
             'category': category
@@ -52,41 +79,22 @@ class CategoryView(TemplateView):
         return context
 
 
-class MyView(TemplateView):
-    template_name = 'my.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        categories = Category.objects.all()
-        my_faq = Faq.objects.filter(
-            visitor=self.request.user,
-            locked=True
-        )
-
-        context.update({
-            'faq_left': my_faq[::2],
-            'faq_right': my_faq[1::2],
-            'categories': categories,
-            'first_category': Category.objects.first(),
-        })
-
-        return context
-
-
 class FaqUnlockedView(TemplateView, PermissionRequiredMixin):
+    """View used by client show all faq with no response """
+
     template_name = 'faq_unlocked.html'
     permission_required = 'faq.can_respond'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        faq_unlocked = Faq.objects.filter(
+        question_unlocked = Question.objects.filter(
             locked=False
         )
 
         context.update({
-            'faq_left': faq_unlocked[::2],
-            'faq_right': faq_unlocked[1::2],
+            'faq_left': question_unlocked[::2],
+            'faq_right': question_unlocked[1::2],
             'first_category': Category.objects.first(),
         })
 
@@ -94,7 +102,9 @@ class FaqUnlockedView(TemplateView, PermissionRequiredMixin):
 
 
 class StartFaqView(FormView):
-    form_class = StartFaqForm
+    """View used by the visitor to ask a question """
+
+    form_class = QuestionForm
     template_name = 'start_faq.html'
 
     def get_context_data(self, **kwargs):
@@ -102,60 +112,77 @@ class StartFaqView(FormView):
 
         context.update({
             'first_category': Category.objects.first(),
+            'visitor_form': UserForm
         })
 
         return context
 
     def form_valid(self, form, *args, **kwargs):
-        category = Category.objects.get(id=form.cleaned_data['category'])
-        visitor_name = form.cleaned_data["visitor"] or "unknown"
-        email = form.cleaned_data["email"] or "unknow@gmail.com"
+        visitor_form = UserForm(self.request.POST)
 
-        try:
-            visitor = User.objects.get(
-                Q(username=visitor_name) | Q(email=email)
+        if visitor_form.is_valid():
+            username = visitor_form.cleaned_data["visitor"] or "unknown"
+            email = visitor_form.cleaned_data["email"] or "unknown@gmail.com"
+
+            try:
+                visitor = User.objects.get(
+                    Q(username=username) | Q(email=email)
+                )
+            except User.DoesNotExist:
+                visitor = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    is_active=False
+                )
+
+            question = form.save()
+            question.visitor = visitor
+            question.save()
+
+            messages.success(
+                self.request,
+                'Votre question est envoyée, '
+                'elle sera consultable lorsque la réponse sera disponible'
             )
-        except ObjectDoesNotExist:
-            visitor = User.objects.create_user(
-                username=visitor_name,
-                email=email,
-                is_active=False
+        else:
+            messages.error(
+                self.kwargs,
+                "{}".format(visitor_form.errors)
             )
-
-        faq = Faq.objects.create(
-            category=category,
-            question=form.cleaned_data["question"],
-            visitor=visitor
-        )
-
-        messages.success(self.request, 'Votre question est envoyée, '
-                                       'elle sera consultable lorsque la '
-                                       'reponse sera disponnible')
 
         return HttpResponseRedirect(
-            reverse('faq:category', args=(category.id,))
+            reverse('faq:category', args=(question.category.id,))
         )
 
 
 class UpdateFaqView(FormView):
-    form_class = UpdateFaqScoreForm
+    """View used by the client to response a faq """
+
+    form_class = ResponseForm
     template_name = 'update_faq.html'
 
-    def get_form_kwargs(self):
-        kwargs = super(UpdateFaqView, self).get_form_kwargs()
-        faq = Faq.objects.get(id=self.kwargs["faq_id"])
-        kwargs['faq'] = faq
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        question = Question.objects.get(id=self.kwargs["faq_id"])
 
-        return kwargs
+        context.update({
+            'first_category': Category.objects.first(),
+            'question': question,
+
+        })
+
+        return context
 
     def form_valid(self, form, *args, **kwargs):
-        faq = Faq.objects.get(id=self.kwargs["faq_id"])
-        faq.response = form.cleaned_data["response"]
-        faq.locked = True
-        faq.responder = self.request.user
-        faq.save()
+        question = Question.objects.get(id=self.kwargs["faq_id"])
+        response = form.save()
+        response.responder = self.request.user
+        response.save()
+        question.response.add(response)
 
-        messages.success(self.request, '{}: répondu'.format(faq.question))
+        messages.success(
+            self.request, '{}: répondu'.format(question.question)
+        )
 
         return HttpResponseRedirect(
             reverse('faq:unlock')
@@ -163,6 +190,8 @@ class UpdateFaqView(FormView):
 
 
 class RegisterView(FormView):
+    """View used by the visitor to register """
+
     form_class = RegisterForm
     template_name = 'register.html'
 
@@ -176,22 +205,7 @@ class RegisterView(FormView):
         return context
 
     def form_valid(self, form, *args, **kwargs):
-        username = form.cleaned_data["username"]
-        email = form.cleaned_data["email"]
-        password = form.cleaned_data["password"]
-
-        try:
-            user = User.objects.get(
-                Q(username=username) | Q(email=email)
-            )
-        except ObjectDoesNotExist:
-            user = User.objects.create_user(
-                username=username,
-                email=email
-            )
-        user.is_active = True
-        user.password = password
-        user.save()
+        form.save()
 
         return HttpResponseRedirect(
             reverse('faq:my')
@@ -204,10 +218,22 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
 
 
-class FaqViewSet(viewsets.ModelViewSet):
+class ResponseViewSet(viewsets.ModelViewSet):
 
-    queryset = Faq.objects.all()
-    serializer_class = FaqSerializer
+    queryset = Response.objects.all()
+    serializer_class = ResponseSerializer
+
+
+class QuestionViewSet(viewsets.ModelViewSet):
+
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+
+
+class QuestionUnlockViewSet(viewsets.ModelViewSet):
+
+    queryset = Question.objects.filter(locked=False)
+    serializer_class = QuestionSerializer
 
 
 # EOF

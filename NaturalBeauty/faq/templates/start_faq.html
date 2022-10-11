@@ -47,12 +47,24 @@
                   <br> <br> <br>
                   <div class="col-lg-12 col-md-12 col-sm-12">
                     <fieldset>
-                      <input name="{{form.visitor.name }}" type="text" class="form-control" placeholder="Full Name">
+                      {% if user.is_authenticated %}
+                      <input name="{{visitor_form.visitor.name }}" type="text"
+                             class="form-control" value="{{user.username}}">
+                      {% else %}
+                      <input name="{{visitor_form.visitor.name }}" type="text"
+                             class="form-control" placeholder="Votre Nom">
+                      {% endif %}
                     </fieldset>
                   </div>
                   <div class="col-lg-12 col-md-12 col-sm-12">
                     <fieldset>
-                      <input name="{{ form.email.name }}" type="email" class="form-control" placeholder="E-Mail Address">
+                      {% if user.is_authenticated %}
+                      <input name="{{ visitor_form.email.name }}"
+                             type="email" class="form-control"
+                             value="{{ user.email}}">
+                    {% else %}
+                       <input name="{{ visitor_form.email.name }}" type="email" class="form-control" placeholder="E-Mail Address">
+                      {% endif %}
                     </fieldset>
                   </div>
 

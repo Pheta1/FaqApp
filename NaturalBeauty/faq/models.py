@@ -16,7 +16,23 @@ class Category(models.Model):
         return self.name
 
 
-class Faq(models.Model):
+class Response(models.Model):
+    response = models.TextField(
+        max_length=1000,
+    )
+    responder = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="responder"
+    )
+
+    def __str__(self):
+        return self.response
+
+
+class Question(models.Model):
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
@@ -27,22 +43,17 @@ class Faq(models.Model):
     question = models.CharField(
         max_length=250,
     )
+    response = models.ManyToManyField(
+        Response,
+        blank=True,
+        related_name="response_of_question"
+    )
     visitor = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         blank=True,
         null=True,
         related_name="visitor"
-    )
-    response = models.TextField(
-        max_length=1000,
-    )
-    responder = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-        related_name="responder"
     )
     locked = models.BooleanField(
         default=False

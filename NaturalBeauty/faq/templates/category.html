@@ -32,9 +32,7 @@
               </ul>
             </div>
           </div>
-			<div class="row">
-              </div>
-                  {% if messages %}
+            {% if messages %}
                     <ul class="messages">
                         {% for message in messages %}
                           <li>
@@ -43,6 +41,8 @@
                         {% endfor %}
                     </ul>
                   {% endif %}
+			<div class="row">
+              </div>
                 {% if faq_left %}
               <div class="left-content">
                   <h4> FAQ: {{ category.name }} <pre>

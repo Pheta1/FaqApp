@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import Permission
 
-from faq.models import Category, Faq
+from .models import Category, Question, Response
 
 
 @admin.register(Category)
@@ -11,11 +11,18 @@ class CategoryAdmin(admin.ModelAdmin):
     list_filter = ('name',)
 
 
-@admin.register(Faq)
+@admin.register(Question)
 class AdminAdmin(admin.ModelAdmin):
     search_fields = ['id']
     list_display = ['id', 'question']
     list_filter = ('question',)
+
+
+@admin.register(Response)
+class AdminAdmin(admin.ModelAdmin):
+    search_fields = ['id']
+    list_display = ['id', 'response']
+    list_filter = ('response',)
 
 
 @admin.register(Permission)
